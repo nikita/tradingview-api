@@ -1,4 +1,4 @@
-const TradingView = require('../main');
+const TradingView = require("../main");
 
 /*
   This examples synchronously
@@ -7,7 +7,7 @@ const TradingView = require('../main');
 
 const client = new TradingView.Client();
 const chart = new client.Session.Chart();
-chart.setMarket('BINANCE:DOTUSDT');
+chart.setMarket("BINANCE:DOTUSDT");
 
 function getIndicData(indicator) {
   return new Promise((res) => {
@@ -23,16 +23,18 @@ function getIndicData(indicator) {
 }
 
 (async () => {
-  console.log('Getting all indicators...');
+  console.log("Getting all indicators...");
 
-  const indicData = await Promise.all([
-    await TradingView.getIndicator('PUB;3lEKXjKWycY5fFZRYYujEy8fxzRRUyF3'),
-    await TradingView.getIndicator('PUB;5nawr3gCESvSHQfOhrLPqQqT4zM23w3X'),
-    await TradingView.getIndicator('PUB;vrOJcNRPULteowIsuP6iHn3GIxBJdXwT'),
-  ].map(getIndicData));
+  const indicData = await Promise.all(
+    [
+      await TradingView.getIndicator("PUB;3lEKXjKWycY5fFZRYYujEy8fxzRRUyF3"),
+      await TradingView.getIndicator("PUB;5nawr3gCESvSHQfOhrLPqQqT4zM23w3X"),
+      await TradingView.getIndicator("PUB;vrOJcNRPULteowIsuP6iHn3GIxBJdXwT"),
+    ].map(getIndicData)
+  );
 
   console.log(indicData);
-  console.log('All done !');
+  console.log("All done !");
 
   client.end();
 })();

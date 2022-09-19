@@ -1,5 +1,5 @@
-const request = require('../request');
-const FormData = require('../FormData');
+const request = require("../request");
+const FormData = require("../FormData");
 
 /**
  * @typedef {Object} AuthorizationUser
@@ -22,8 +22,8 @@ class PinePermManager {
    * @param {string} pineId Indicator ID (Like: PUB;XXXXXXXXXXXXXXXXXXXXX)
    */
   constructor(sessionId, pineId) {
-    if (!sessionId) throw new Error('Please provide a SessionID');
-    if (!pineId) throw new Error('Please provide a PineID');
+    if (!sessionId) throw new Error("Please provide a SessionID");
+    if (!pineId) throw new Error("Please provide a PineID");
     this.pineId = pineId;
     this.sessionId = sessionId;
   }
@@ -39,19 +39,23 @@ class PinePermManager {
    * } order Fetching order
    * @returns {AuthorizationUser[]}
    */
-  async getUsers(limit = 10, order = '-created') {
-    const { data } = await request({
-      method: 'POST',
-      host: 'www.tradingview.com',
-      path: `/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
-      headers: {
-        origin: 'https://www.tradingview.com',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        cookie: `sessionid=${this.sessionId}`,
+  async getUsers(limit = 10, order = "-created") {
+    const { data } = await request(
+      {
+        method: "POST",
+        host: "www.tradingview.com",
+        path: `/pine_perm/list_users/?limit=${limit}&order_by=${order}`,
+        headers: {
+          origin: "https://www.tradingview.com",
+          "Content-Type": "application/x-www-form-urlencoded",
+          cookie: `sessionid=${this.sessionId}`,
+        },
       },
-    }, false, `pine_id=${this.pineId.replace(/;/g, '%3B')}`);
+      false,
+      `pine_id=${this.pineId.replace(/;/g, "%3B")}`
+    );
 
-    if (!data.results) throw new Error('Wrong sessionId or pineId');
+    if (!data.results) throw new Error("Wrong sessionId or pineId");
 
     return data.results;
   }
@@ -64,24 +68,28 @@ class PinePermManager {
    */
   async addUser(username, expiration = null) {
     const formData = new FormData();
-    formData.append('pine_id', this.pineId);
-    formData.append('username_recip', username);
+    formData.append("pine_id", this.pineId);
+    formData.append("username_recip", username);
     if (expiration && expiration instanceof Date) {
-      formData.append('expiration', expiration.toString());
+      formData.append("expiration", expiration.toString());
     }
 
-    const { data } = await request({
-      method: 'POST',
-      host: 'www.tradingview.com',
-      path: '/pine_perm/add/',
-      headers: {
-        origin: 'https://www.tradingview.com',
-        'Content-Type': `multipart/form-data; boundary=${formData.boundary}`,
-        cookie: `sessionid=${this.sessionId}`,
+    const { data } = await request(
+      {
+        method: "POST",
+        host: "www.tradingview.com",
+        path: "/pine_perm/add/",
+        headers: {
+          origin: "https://www.tradingview.com",
+          "Content-Type": `multipart/form-data; boundary=${formData.boundary}`,
+          cookie: `sessionid=${this.sessionId}`,
+        },
       },
-    }, false, formData.toString());
+      false,
+      formData.toString()
+    );
 
-    if (!data.status) throw new Error('Wrong sessionId or pineId');
+    if (!data.status) throw new Error("Wrong sessionId or pineId");
     return data.status;
   }
 
@@ -93,24 +101,28 @@ class PinePermManager {
    */
   async modifyExpiration(username, expiration = null) {
     const formData = new FormData();
-    formData.append('pine_id', this.pineId);
-    formData.append('username_recip', username);
+    formData.append("pine_id", this.pineId);
+    formData.append("username_recip", username);
     if (expiration && expiration instanceof Date) {
-      formData.append('expiration', expiration.toISOString());
+      formData.append("expiration", expiration.toISOString());
     }
 
-    const { data } = await request({
-      method: 'POST',
-      host: 'www.tradingview.com',
-      path: '/pine_perm/modify_user_expiration/',
-      headers: {
-        origin: 'https://www.tradingview.com',
-        'Content-Type': `multipart/form-data; boundary=${formData.boundary}`,
-        cookie: `sessionid=${this.sessionId}`,
+    const { data } = await request(
+      {
+        method: "POST",
+        host: "www.tradingview.com",
+        path: "/pine_perm/modify_user_expiration/",
+        headers: {
+          origin: "https://www.tradingview.com",
+          "Content-Type": `multipart/form-data; boundary=${formData.boundary}`,
+          cookie: `sessionid=${this.sessionId}`,
+        },
       },
-    }, false, formData.toString());
+      false,
+      formData.toString()
+    );
 
-    if (!data.status) throw new Error('Wrong sessionId or pineId');
+    if (!data.status) throw new Error("Wrong sessionId or pineId");
     return data.status;
   }
 
@@ -121,21 +133,25 @@ class PinePermManager {
    */
   async removeUser(username) {
     const formData = new FormData();
-    formData.append('pine_id', this.pineId);
-    formData.append('username_recip', username);
+    formData.append("pine_id", this.pineId);
+    formData.append("username_recip", username);
 
-    const { data } = await request({
-      method: 'POST',
-      host: 'www.tradingview.com',
-      path: '/pine_perm/remove/',
-      headers: {
-        origin: 'https://www.tradingview.com',
-        'Content-Type': `multipart/form-data; boundary=${formData.boundary}`,
-        cookie: `sessionid=${this.sessionId}`,
+    const { data } = await request(
+      {
+        method: "POST",
+        host: "www.tradingview.com",
+        path: "/pine_perm/remove/",
+        headers: {
+          origin: "https://www.tradingview.com",
+          "Content-Type": `multipart/form-data; boundary=${formData.boundary}`,
+          cookie: `sessionid=${this.sessionId}`,
+        },
       },
-    }, false, formData.toString());
+      false,
+      formData.toString()
+    );
 
-    if (!data.status) throw new Error('Wrong sessionId or pineId');
+    if (!data.status) throw new Error("Wrong sessionId or pineId");
     return data.status;
   }
 }

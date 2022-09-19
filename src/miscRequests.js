@@ -1,30 +1,34 @@
-const os = require('os');
-const https = require('https');
-const request = require('./request');
-const FormData = require('./FormData');
+const os = require("os");
+const https = require("https");
+const request = require("./request");
+const FormData = require("./FormData");
 
-const PinePermManager = require('./classes/PinePermManager');
-const PineIndicator = require('./classes/PineIndicator');
+const PinePermManager = require("./classes/PinePermManager");
+const PineIndicator = require("./classes/PineIndicator");
 
-const indicators = ['Recommend.Other', 'Recommend.All', 'Recommend.MA'];
+const indicators = ["Recommend.Other", "Recommend.All", "Recommend.MA"];
 const builtInIndicList = [];
 
-async function fetchScanData(tickers = [], type = '', columns = []) {
-  let { data } = await request({
-    method: 'POST',
-    hostname: 'scanner.tradingview.com',
-    path: `/${type}/scan`,
-    headers: {
-      'Content-Type': 'application/json',
+async function fetchScanData(tickers = [], type = "", columns = []) {
+  let { data } = await request(
+    {
+      method: "POST",
+      hostname: "scanner.tradingview.com",
+      path: `/${type}/scan`,
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  }, true, JSON.stringify({ symbols: { tickers }, columns }));
+    true,
+    JSON.stringify({ symbols: { tickers }, columns })
+  );
 
-  if (!data.startsWith('{')) throw new Error('Wrong screener or symbol');
+  if (!data.startsWith("{")) throw new Error("Wrong screener or symbol");
 
   try {
     data = JSON.parse(data);
   } catch (e) {
-    throw new Error('Can\'t parse server response');
+    throw new Error("Can't parse server response");
   }
 
   return data;
@@ -68,23 +72,23 @@ module.exports = {
    * @function getScreener
    * @param {string} exchange Example: BINANCE, EURONEXT, NASDAQ
    * @returns {Screener}
-  */
+   */
   getScreener(exchange) {
     const e = exchange.toUpperCase();
-    if (['NASDAQ', 'NYSE', 'NYSE ARCA', 'OTC'].includes(e)) return 'america';
-    if (['ASX'].includes(e)) return 'australia';
-    if (['TSX', 'TSXV', 'CSE', 'NEO'].includes(e)) return 'canada';
-    if (['EGX'].includes(e)) return 'egypt';
-    if (['FWB', 'SWB', 'XETR'].includes(e)) return 'germany';
-    if (['BSE', 'NSE'].includes(e)) return 'india';
-    if (['TASE'].includes(e)) return 'israel';
-    if (['MIL', 'MILSEDEX'].includes(e)) return 'italy';
-    if (['LUXSE'].includes(e)) return 'luxembourg';
-    if (['NEWCONNECT'].includes(e)) return 'poland';
-    if (['NGM'].includes(e)) return 'sweden';
-    if (['BIST'].includes(e)) return 'turkey';
-    if (['LSE', 'LSIN'].includes(e)) return 'uk';
-    if (['HNX'].includes(e)) return 'vietnam';
+    if (["NASDAQ", "NYSE", "NYSE ARCA", "OTC"].includes(e)) return "america";
+    if (["ASX"].includes(e)) return "australia";
+    if (["TSX", "TSXV", "CSE", "NEO"].includes(e)) return "canada";
+    if (["EGX"].includes(e)) return "egypt";
+    if (["FWB", "SWB", "XETR"].includes(e)) return "germany";
+    if (["BSE", "NSE"].includes(e)) return "india";
+    if (["TASE"].includes(e)) return "israel";
+    if (["MIL", "MILSEDEX"].includes(e)) return "italy";
+    if (["LUXSE"].includes(e)) return "luxembourg";
+    if (["NEWCONNECT"].includes(e)) return "poland";
+    if (["NGM"].includes(e)) return "sweden";
+    if (["BIST"].includes(e)) return "turkey";
+    if (["LSE", "LSIN"].includes(e)) return "uk";
+    if (["HNX"].includes(e)) return "vietnam";
     return exchange.toLowerCase();
   },
 
@@ -98,18 +102,18 @@ module.exports = {
   async getTA(screener, id) {
     const advice = {};
 
-    const cols = ['1', '5', '15', '60', '240', '1D', '1W', '1M']
-      .map((t) => indicators.map((i) => (t !== '1D' ? `${i}|${t}` : i)))
+    const cols = ["1", "5", "15", "60", "240", "1D", "1W", "1M"]
+      .map((t) => indicators.map((i) => (t !== "1D" ? `${i}|${t}` : i)))
       .flat();
 
     const rs = await fetchScanData([id], screener, cols);
     if (!rs.data || !rs.data[0]) return false;
 
     rs.data[0].d.forEach((val, i) => {
-      const [name, period] = cols[i].split('|');
-      const pName = period || '1D';
+      const [name, period] = cols[i].split("|");
+      const pName = period || "1D";
       if (!advice[pName]) advice[pName] = {};
-      advice[pName][name.split('.').pop()] = Math.round(val * 1000) / 500;
+      advice[pName][name.split(".").pop()] = Math.round(val * 1000) / 500;
     });
 
     return advice;
@@ -137,21 +141,23 @@ module.exports = {
    * } [filter] Caterogy filter
    * @returns {Promise<SearchMarketResult[]>} Search results
    */
-  async searchMarket(search, filter = '') {
+  async searchMarket(search, filter = "") {
     const { data } = await request({
-      host: 'symbol-search.tradingview.com',
-      path: `/symbol_search/?text=${search.replace(/ /g, '%20')}&type=${filter}`,
-      origin: 'https://www.tradingview.com',
+      host: "symbol-search.tradingview.com",
+      path: `/symbol_search/?text=${search.replace(
+        / /g,
+        "%20"
+      )}&type=${filter}`,
+      origin: "https://www.tradingview.com",
     });
 
     return data.map((s) => {
-      const exchange = s.exchange.split(' ')[0];
+      const exchange = s.exchange.split(" ")[0];
       const id = `${exchange}:${s.symbol}`;
 
-      const screener = (['forex', 'crypto'].includes(s.type)
+      const screener = ["forex", "crypto"].includes(s.type)
         ? s.type
-        : this.getScreener(exchange)
-      );
+        : this.getScreener(exchange);
 
       return {
         id,
@@ -186,45 +192,54 @@ module.exports = {
    * @param {string} search Keywords
    * @returns {Promise<SearchIndicatorResult[]>} Search results
    */
-  async searchIndicator(search = '') {
+  async searchIndicator(search = "") {
     if (!builtInIndicList.length) {
-      await Promise.all(['standard', 'candlestick', 'fundamental'].map(async (type) => {
-        builtInIndicList.push(...(await request({
-          host: 'pine-facade.tradingview.com',
-          path: `/pine-facade/list/?filter=${type}`,
-        })).data);
-      }));
+      await Promise.all(
+        ["standard", "candlestick", "fundamental"].map(async (type) => {
+          builtInIndicList.push(
+            ...(
+              await request({
+                host: "pine-facade.tradingview.com",
+                path: `/pine-facade/list/?filter=${type}`,
+              })
+            ).data
+          );
+        })
+      );
     }
 
     const { data } = await request({
-      host: 'www.tradingview.com',
-      path: `/pubscripts-suggest-json/?search=${search.replace(/ /g, '%20')}`,
+      host: "www.tradingview.com",
+      path: `/pubscripts-suggest-json/?search=${search.replace(/ /g, "%20")}`,
     });
 
-    function norm(str = '') {
-      return str.toUpperCase().replace(/[^A-Z]/g, '');
+    function norm(str = "") {
+      return str.toUpperCase().replace(/[^A-Z]/g, "");
     }
 
     return [
-      ...builtInIndicList.filter((i) => (
-        norm(i.scriptName).includes(norm(search))
-        || norm(i.extra.shortDescription).includes(norm(search))
-      )).map((ind) => ({
-        id: ind.scriptIdPart,
-        version: ind.version,
-        name: ind.scriptName,
-        author: {
-          id: ind.userId,
-          username: '@TRADINGVIEW@',
-        },
-        image: '',
-        access: 'closed_source',
-        source: '',
-        type: (ind.extra && ind.extra.kind) ? ind.extra.kind : 'study',
-        get() {
-          return module.exports.getIndicator(ind.scriptIdPart, ind.version);
-        },
-      })),
+      ...builtInIndicList
+        .filter(
+          (i) =>
+            norm(i.scriptName).includes(norm(search)) ||
+            norm(i.extra.shortDescription).includes(norm(search))
+        )
+        .map((ind) => ({
+          id: ind.scriptIdPart,
+          version: ind.version,
+          name: ind.scriptName,
+          author: {
+            id: ind.userId,
+            username: "@TRADINGVIEW@",
+          },
+          image: "",
+          access: "closed_source",
+          source: "",
+          type: ind.extra && ind.extra.kind ? ind.extra.kind : "study",
+          get() {
+            return module.exports.getIndicator(ind.scriptIdPart, ind.version);
+          },
+        })),
 
       ...data.results.map((ind) => ({
         id: ind.scriptIdPart,
@@ -235,9 +250,11 @@ module.exports = {
           username: ind.author.username,
         },
         image: ind.imageUrl,
-        access: ['open_source', 'closed_source', 'invite_only'][ind.access - 1] || 'other',
+        access:
+          ["open_source", "closed_source", "invite_only"][ind.access - 1] ||
+          "other",
         source: ind.scriptSource,
-        type: (ind.extra && ind.extra.kind) ? ind.extra.kind : 'study',
+        type: ind.extra && ind.extra.kind ? ind.extra.kind : "study",
         get() {
           return module.exports.getIndicator(ind.scriptIdPart, ind.version);
         },
@@ -252,13 +269,16 @@ module.exports = {
    * @param {'last' | string} [version] Wanted version of the indicator
    * @returns {Promise<PineIndicator>} Indicator
    */
-  async getIndicator(id, version = 'last') {
-    const indicID = id.replace(/ |%/g, '%25');
+  async getIndicator(id, version = "last") {
+    const indicID = id.replace(/ |%/g, "%25");
 
-    let { data } = await request({
-      host: 'pine-facade.tradingview.com',
-      path: `/pine-facade/translate/${indicID}/${version}`,
-    }, true);
+    let { data } = await request(
+      {
+        host: "pine-facade.tradingview.com",
+        path: `/pine-facade/translate/${indicID}/${version}`,
+      },
+      true
+    );
 
     try {
       data = JSON.parse(data);
@@ -266,16 +286,22 @@ module.exports = {
       throw new Error(`Inexistent or unsupported indicator: '${id}'`);
     }
 
-    if (!data.success || !data.result.metaInfo || !data.result.metaInfo.inputs) {
+    if (
+      !data.success ||
+      !data.result.metaInfo ||
+      !data.result.metaInfo.inputs
+    ) {
       throw new Error(`Inexistent or unsupported indicator: "${data.reason}"`);
     }
 
     const inputs = {};
 
     data.result.metaInfo.inputs.forEach((input) => {
-      if (['text', 'pineId', 'pineVersion'].includes(input.id)) return;
+      if (["text", "pineId", "pineVersion"].includes(input.id)) return;
 
-      const inlineName = input.name.replace(/ /g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+      const inlineName = input.name
+        .replace(/ /g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
 
       inputs[input.id] = {
         name: input.name,
@@ -295,13 +321,9 @@ module.exports = {
     const plots = {};
 
     Object.keys(data.result.metaInfo.styles).forEach((plotId) => {
-      const plotTitle = data
-        .result
-        .metaInfo
-        .styles[plotId]
-        .title
-        .replace(/ /g, '_')
-        .replace(/[^a-zA-Z0-9_]/g, '');
+      const plotTitle = data.result.metaInfo.styles[plotId].title
+        .replace(/ /g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
 
       const titles = Object.values(plots);
 
@@ -356,26 +378,30 @@ module.exports = {
    * @param {string} [UA] Custom UserAgent
    * @returns {Promise<User>} Token
    */
-  async loginUser(username, password, remember = true, UA = 'TWAPI/3.0') {
+  async loginUser(username, password, remember = true, UA = "TWAPI/3.0") {
     const formData = new FormData();
-    formData.append('username', username);
-    formData.append('password', password);
-    if (remember) formData.append('remember', 'on');
+    formData.append("username", username);
+    formData.append("password", password);
+    if (remember) formData.append("remember", "on");
 
-    const { data, cookies } = await request({
-      method: 'POST',
-      host: 'www.tradingview.com',
-      path: '/accounts/signin/',
-      headers: {
-        referer: 'https://www.tradingview.com',
-        'Content-Type': `multipart/form-data; boundary=${formData.boundary}`,
-        'User-agent': `${UA} (${os.version()}; ${os.platform()}; ${os.arch()})`,
+    const { data, cookies } = await request(
+      {
+        method: "POST",
+        host: "www.tradingview.com",
+        path: "/accounts/signin/",
+        headers: {
+          referer: "https://www.tradingview.com",
+          "Content-Type": `multipart/form-data; boundary=${formData.boundary}`,
+          "User-agent": `${UA} (${os.version()}; ${os.platform()}; ${os.arch()})`,
+        },
       },
-    }, false, formData.toString());
+      false,
+      formData.toString()
+    );
 
     if (data.error) throw new Error(data.error);
 
-    const cookie = cookies.find((c) => c.includes('sessionid='));
+    const cookie = cookies.find((c) => c.includes("sessionid="));
     const session = (cookie.match(/sessionid=(.*?);/) ?? [])[1];
 
     return {
@@ -402,42 +428,64 @@ module.exports = {
    * @param {string} [location] Auth page location (For france: https://fr.tradingview.com/)
    * @returns {Promise<User>} Token
    */
-  async getUser(session, location = 'https://www.tradingview.com/') {
+  async getUser(session, location = "https://www.tradingview.com/") {
     return new Promise((cb, err) => {
-      https.get(location, {
-        headers: { cookie: `sessionid=${session}` },
-      }, (res) => {
-        let rs = '';
-        res.on('data', (d) => { rs += d; });
-        res.on('end', async () => {
-          if (res.headers.location && location !== res.headers.location) {
-            cb(await module.exports.getUser(session, res.headers.location));
-            return;
-          }
-          if (rs.includes('auth_token')) {
-            cb({
-              id: /"id":([0-9]{1,10}),/.exec(rs)[1],
-              username: /"username":"(.*?)"/.exec(rs)[1],
-              firstName: /"first_name":"(.*?)"/.exec(rs)[1],
-              lastName: /"last_name":"(.*?)"/.exec(rs)[1],
-              reputation: parseFloat(/"reputation":(.*?),/.exec(rs)[1] || 0),
-              following: parseFloat(/,"following":([0-9]*?),/.exec(rs)[1] || 0),
-              followers: parseFloat(/,"followers":([0-9]*?),/.exec(rs)[1] || 0),
-              notifications: {
-                following: parseFloat(/"notification_count":\{"following":([0-9]*),/.exec(rs)[1] || 0),
-                user: parseFloat(/"notification_count":\{"following":[0-9]*,"user":([0-9]*)/.exec(rs)[1] || 0),
-              },
-              session,
-              sessionHash: /"session_hash":"(.*?)"/.exec(rs)[1],
-              privateChannel: /"private_channel":"(.*?)"/.exec(rs)[1],
-              authToken: /"auth_token":"(.*?)"/.exec(rs)[1],
-              joinDate: new Date(/"date_joined":"(.*?)"/.exec(rs)[1] || 0),
+      https
+        .get(
+          location,
+          {
+            headers: { cookie: `sessionid=${session}` },
+          },
+          (res) => {
+            let rs = "";
+            res.on("data", (d) => {
+              rs += d;
             });
-          } else err(new Error('Wrong or expired sessionid'));
-        });
+            res.on("end", async () => {
+              if (res.headers.location && location !== res.headers.location) {
+                cb(await module.exports.getUser(session, res.headers.location));
+                return;
+              }
+              if (rs.includes("auth_token")) {
+                cb({
+                  id: /"id":([0-9]{1,10}),/.exec(rs)[1],
+                  username: /"username":"(.*?)"/.exec(rs)[1],
+                  firstName: /"first_name":"(.*?)"/.exec(rs)[1],
+                  lastName: /"last_name":"(.*?)"/.exec(rs)[1],
+                  reputation: parseFloat(
+                    /"reputation":(.*?),/.exec(rs)[1] || 0
+                  ),
+                  following: parseFloat(
+                    /,"following":([0-9]*?),/.exec(rs)[1] || 0
+                  ),
+                  followers: parseFloat(
+                    /,"followers":([0-9]*?),/.exec(rs)[1] || 0
+                  ),
+                  notifications: {
+                    following: parseFloat(
+                      /"notification_count":\{"following":([0-9]*),/.exec(
+                        rs
+                      )[1] || 0
+                    ),
+                    user: parseFloat(
+                      /"notification_count":\{"following":[0-9]*,"user":([0-9]*)/.exec(
+                        rs
+                      )[1] || 0
+                    ),
+                  },
+                  session,
+                  sessionHash: /"session_hash":"(.*?)"/.exec(rs)[1],
+                  privateChannel: /"private_channel":"(.*?)"/.exec(rs)[1],
+                  authToken: /"auth_token":"(.*?)"/.exec(rs)[1],
+                  joinDate: new Date(/"date_joined":"(.*?)"/.exec(rs)[1] || 0),
+                });
+              } else err(new Error("Wrong or expired sessionid"));
+            });
 
-        res.on('error', err);
-      }).end();
+            res.on("error", err);
+          }
+        )
+        .end();
     });
   },
 
@@ -449,42 +497,55 @@ module.exports = {
    */
   async getPrivateIndicators(session) {
     return new Promise((cb, err) => {
-      https.get('https://pine-facade.tradingview.com/pine-facade/list?filter=saved', {
-        headers: { cookie: `sessionid=${session}` },
-      }, (res) => {
-        let rs = '';
-        res.on('data', (d) => { rs += d; });
-        res.on('end', async () => {
-          try {
-            rs = JSON.parse(rs);
-          } catch (error) {
-            err(new Error('Can\'t parse private indicator list'));
-            return;
+      https
+        .get(
+          "https://pine-facade.tradingview.com/pine-facade/list?filter=saved",
+          {
+            headers: { cookie: `sessionid=${session}` },
+          },
+          (res) => {
+            let rs = "";
+            res.on("data", (d) => {
+              rs += d;
+            });
+            res.on("end", async () => {
+              try {
+                rs = JSON.parse(rs);
+              } catch (error) {
+                err(new Error("Can't parse private indicator list"));
+                return;
+              }
+
+              cb(
+                rs.map((ind) => ({
+                  id: ind.scriptIdPart,
+                  version: ind.version,
+                  name: ind.scriptName,
+                  author: {
+                    id: -1,
+                    username: "@ME@",
+                  },
+                  image: ind.imageUrl,
+                  access: "private",
+                  source: ind.scriptSource,
+                  type: ind.extra && ind.extra.kind ? ind.extra.kind : "study",
+                  get() {
+                    return module.exports.getIndicator(
+                      ind.scriptIdPart,
+                      ind.version
+                    );
+                  },
+                  getManager() {
+                    return new PinePermManager(ind.scriptIdPart);
+                  },
+                }))
+              );
+            });
+
+            res.on("error", err);
           }
-
-          cb(rs.map((ind) => ({
-            id: ind.scriptIdPart,
-            version: ind.version,
-            name: ind.scriptName,
-            author: {
-              id: -1,
-              username: '@ME@',
-            },
-            image: ind.imageUrl,
-            access: 'private',
-            source: ind.scriptSource,
-            type: (ind.extra && ind.extra.kind) ? ind.extra.kind : 'study',
-            get() {
-              return module.exports.getIndicator(ind.scriptIdPart, ind.version);
-            },
-            getManager() {
-              return new PinePermManager(ind.scriptIdPart);
-            },
-          })));
-        });
-
-        res.on('error', err);
-      }).end();
+        )
+        .end();
     });
   },
 
@@ -508,12 +569,12 @@ module.exports = {
     const session = creds ? credentials.session : null;
 
     const { data } = await request({
-      host: 'www.tradingview.com',
+      host: "www.tradingview.com",
       path: `/chart-token/?image_url=${layout}&user_id=${userID}`,
-      headers: { cookie: session ? `sessionid=${session}` : '' },
+      headers: { cookie: session ? `sessionid=${session}` : "" },
     });
 
-    if (!data.token) throw new Error('Wrong layout or credentials');
+    if (!data.token) throw new Error("Wrong layout or credentials");
 
     return data.token;
   },
@@ -549,22 +610,25 @@ module.exports = {
    * @param {number} [chartID] Chart ID
    * @returns {Promise<Drawing[]>} Drawings
    */
-  async getDrawings(layout, symbol = '', credentials = {}, chartID = 1) {
+  async getDrawings(layout, symbol = "", credentials = {}, chartID = 1) {
     const chartToken = await module.exports.getChartToken(layout, credentials);
     const creds = credentials.id && credentials.session;
     const session = creds ? credentials.session : null;
 
     const { data } = await request({
-      host: 'charts-storage.tradingview.com',
-      path: `/charts-storage/layout/${layout}/sources?chart_id=${chartID
-      }&jwt=${chartToken}${symbol ? `&symbol=${symbol}` : ''}`,
-      headers: { cookie: session ? `sessionid=${session}` : '' },
+      host: "charts-storage.tradingview.com",
+      path: `/charts-storage/layout/${layout}/sources?chart_id=${chartID}&jwt=${chartToken}${
+        symbol ? `&symbol=${symbol}` : ""
+      }`,
+      headers: { cookie: session ? `sessionid=${session}` : "" },
     });
 
-    if (!data.payload) throw new Error('Wrong layout, user credentials, or chart id.');
+    if (!data.payload)
+      throw new Error("Wrong layout, user credentials, or chart id.");
 
     return Object.values(data.payload.sources || {}).map((drawing) => ({
-      ...drawing, ...drawing.state,
+      ...drawing,
+      ...drawing.state,
     }));
   },
 };

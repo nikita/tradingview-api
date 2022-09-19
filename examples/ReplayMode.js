@@ -1,4 +1,4 @@
-const TradingView = require('../main');
+const TradingView = require("../main");
 
 /*
   This example tests the real replay
@@ -7,13 +7,13 @@ const TradingView = require('../main');
 */
 
 const config = {
-  symbol: 'BINANCE:BTCEUR',
-  timeframe: 'D',
+  symbol: "BINANCE:BTCEUR",
+  timeframe: "D",
   startFrom: Math.round(Date.now() / 1000) - 86400 * 7, // Seven days before now
   // startFrom: 1600000000,
 };
 
-console.log('----- Testing ReplayMode: -----');
+console.log("----- Testing ReplayMode: -----");
 
 const client = new TradingView.Client();
 const chart = new client.Session.Chart();
@@ -65,7 +65,7 @@ async function step() {
 
   periods[period.time] = period;
 
-  console.log('Next ->', period.time, times.length);
+  console.log("Next ->", period.time, times.length);
 
   await chart.replayStep(1);
   step();
@@ -73,16 +73,18 @@ async function step() {
 
 chart.onReplayEnd(async () => {
   await client.end();
-  console.log('Done !', Object.keys(periods).length);
+  console.log("Done !", Object.keys(periods).length);
 });
 
 async function addIndicator(name, pineId, options = {}) {
   loading += 1;
 
-  const indic = pineId.includes('@')
+  const indic = pineId.includes("@")
     ? new TradingView.BuiltInIndicator(pineId)
     : await TradingView.getIndicator(pineId);
-  Object.keys(options).forEach((o) => { indic.setOption(o, options[o]); });
+  Object.keys(options).forEach((o) => {
+    indic.setOption(o, options[o]);
+  });
 
   const std = new chart.Study(indic);
 
@@ -92,6 +94,6 @@ async function addIndicator(name, pineId, options = {}) {
   });
 }
 
-addIndicator('Volume', 'Volume@tv-basicstudies-144');
-addIndicator('EMA_50', 'STD;EMA', { Length: 50 });
-addIndicator('EMA_200', 'STD;EMA', { Length: 200 });
+addIndicator("Volume", "Volume@tv-basicstudies-144");
+addIndicator("EMA_50", "STD;EMA", { Length: 50 });
+addIndicator("EMA_200", "STD;EMA", { Length: 200 });

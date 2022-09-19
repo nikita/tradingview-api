@@ -1,17 +1,17 @@
 const TRANSLATOR = {
   /** @typedef {'right' | 'left' | 'both' | 'none'} ExtendValue */
   extend: {
-    r: 'right',
-    l: 'left',
-    b: 'both',
-    n: 'none',
+    r: "right",
+    l: "left",
+    b: "both",
+    n: "none",
   },
 
   /** @typedef {'price' | 'abovebar' | 'belowbar'} yLocValue */
   yLoc: {
-    pr: 'price',
-    ab: 'abovebar',
-    bl: 'belowbar',
+    pr: "price",
+    ab: "abovebar",
+    bl: "belowbar",
   },
 
   /**
@@ -24,26 +24,26 @@ const TRANSLATOR = {
    * } LabelStyleValue
    * */
   labelStyle: {
-    n: 'none',
-    xcr: 'xcross',
-    cr: 'cross',
-    tup: 'triangleup',
-    tdn: 'triangledown',
-    flg: 'flag',
-    cir: 'circle',
-    aup: 'arrowup',
-    adn: 'arrowdown',
-    lup: 'label_up',
-    ldn: 'label_down',
-    llf: 'label_left',
-    lrg: 'label_right',
-    llwlf: 'label_lower_left',
-    llwrg: 'label_lower_right',
-    luplf: 'label_upper_left',
-    luprg: 'label_upper_right',
-    lcn: 'label_center',
-    sq: 'square',
-    dia: 'diamond',
+    n: "none",
+    xcr: "xcross",
+    cr: "cross",
+    tup: "triangleup",
+    tdn: "triangledown",
+    flg: "flag",
+    cir: "circle",
+    aup: "arrowup",
+    adn: "arrowdown",
+    lup: "label_up",
+    ldn: "label_down",
+    llf: "label_left",
+    lrg: "label_right",
+    llwlf: "label_lower_left",
+    llwrg: "label_lower_right",
+    luplf: "label_upper_left",
+    luprg: "label_upper_right",
+    lcn: "label_center",
+    sq: "square",
+    dia: "diamond",
   },
 
   /**
@@ -51,19 +51,19 @@ const TRANSLATOR = {
    * | 'arrow_right' | 'arrow_both'} LineStyleValue
    */
   lineStyle: {
-    sol: 'solid',
-    dot: 'dotted',
-    dsh: 'dashed',
-    al: 'arrow_left',
-    ar: 'arrow_right',
-    ab: 'arrow_both',
+    sol: "solid",
+    dot: "dotted",
+    dsh: "dashed",
+    al: "arrow_left",
+    ar: "arrow_right",
+    ab: "arrow_both",
   },
 
   /** @typedef {'solid' | 'dotted' | 'dashed'} BoxStyleValue */
   boxStyle: {
-    sol: 'solid',
-    dot: 'dotted',
-    dsh: 'dashed',
+    sol: "solid",
+    dot: "dotted",
+    dsh: "dashed",
   },
 };
 

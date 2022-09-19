@@ -34,7 +34,7 @@ module.exports = class PineIndicator {
   #options;
 
   /** @type {IndicatorType} */
-  #type = 'Script@tv-scripting-101!';
+  #type = "Script@tv-scripting-101!";
 
   /** @param {Indicator} options Indicator */
   constructor(options) {
@@ -80,7 +80,7 @@ module.exports = class PineIndicator {
    * Set the indicator type
    * @param {IndicatorType} type Indicator type
    */
-  setType(type = 'Script@tv-scripting-101!') {
+  setType(type = "Script@tv-scripting-101!") {
     this.#type = type;
   }
 
@@ -96,34 +96,43 @@ module.exports = class PineIndicator {
    * @param {*} value The new value of the property
    */
   setOption(key, value) {
-    let propI = '';
+    let propI = "";
 
     if (this.#options.inputs[`in_${key}`]) propI = `in_${key}`;
     else if (this.#options.inputs[key]) propI = key;
     else {
-      propI = Object.keys(this.#options.inputs).find((I) => (
-        this.#options.inputs[I].inline === key
-        || this.#options.inputs[I].internalID === key
-      ));
+      propI = Object.keys(this.#options.inputs).find(
+        (I) =>
+          this.#options.inputs[I].inline === key ||
+          this.#options.inputs[I].internalID === key
+      );
     }
 
     if (propI && this.#options.inputs[propI]) {
       const input = this.#options.inputs[propI];
 
       const types = {
-        bool: 'Boolean',
-        integer: 'Number',
-        float: 'Number',
-        text: 'String',
+        bool: "Boolean",
+        integer: "Number",
+        float: "Number",
+        text: "String",
       };
 
       // eslint-disable-next-line valid-typeof
-      if (types[input.type] && typeof value !== types[input.type].toLowerCase()) {
-        throw new Error(`Input '${input.name}' (${propI}) must be a ${types[input.type]} !`);
+      if (
+        types[input.type] &&
+        typeof value !== types[input.type].toLowerCase()
+      ) {
+        throw new Error(
+          `Input '${input.name}' (${propI}) must be a ${types[input.type]} !`
+        );
       }
 
       if (input.options && !input.options.includes(value)) {
-        throw new Error(`Input '${input.name}' (${propI}) must be one of these values:`, input.options);
+        throw new Error(
+          `Input '${input.name}' (${propI}) must be one of these values:`,
+          input.options
+        );
       }
 
       input.value = value;

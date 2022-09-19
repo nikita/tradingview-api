@@ -1,8 +1,8 @@
 /** @class */
 class FormData {
-  #string = '';
+  #string = "";
 
-  #boundary = '';
+  #boundary = "";
 
   get boundary() {
     return this.#boundary;

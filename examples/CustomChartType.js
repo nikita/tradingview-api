@@ -1,4 +1,4 @@
-const TradingView = require('../main');
+const TradingView = require("../main");
 
 /*
   This example creates charts of custom
@@ -16,37 +16,37 @@ const client = new TradingView.Client({
 const chart = new client.Session.Chart();
 
 chart.onError((...err) => {
-  console.log('Chart error:', ...err);
+  console.log("Chart error:", ...err);
   process.exit(1);
 });
 
 chart.onUpdate(() => {
   if (!chart.periods[0]) return;
-  console.log('Last period', chart.periods[0]);
+  console.log("Last period", chart.periods[0]);
 });
 
 /* (0s) Heikin Ashi chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: HeikinAshi');
+  console.log("\nSetting chart type to: HeikinAshi");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'HeikinAshi',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "HeikinAshi",
+    timeframe: "D",
   });
 }, 0);
 
 /* (5s) Renko chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: Renko');
+  console.log("\nSetting chart type to: Renko");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'Renko',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "Renko",
+    timeframe: "D",
     inputs: {
-      source: 'close',
-      sources: 'Close',
+      source: "close",
+      sources: "Close",
       boxSize: 3,
-      style: 'ATR',
+      style: "ATR",
       atrLength: 14,
       wicks: true,
     },
@@ -55,13 +55,13 @@ setTimeout(() => {
 
 /* (10s) Line Break chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: LineBreak');
+  console.log("\nSetting chart type to: LineBreak");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'LineBreak',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "LineBreak",
+    timeframe: "D",
     inputs: {
-      source: 'close',
+      source: "close",
       lb: 3,
     },
   });
@@ -69,14 +69,14 @@ setTimeout(() => {
 
 /* (15s) Kagi chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: Kagi');
+  console.log("\nSetting chart type to: Kagi");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'Kagi',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "Kagi",
+    timeframe: "D",
     inputs: {
-      source: 'close',
-      style: 'ATR',
+      source: "close",
+      style: "ATR",
       atrLength: 14,
       reversalAmount: 1,
     },
@@ -85,16 +85,16 @@ setTimeout(() => {
 
 /* (20s) Point & Figure chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: PointAndFigure');
+  console.log("\nSetting chart type to: PointAndFigure");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'PointAndFigure',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "PointAndFigure",
+    timeframe: "D",
     inputs: {
-      sources: 'Close',
+      sources: "Close",
       reversalAmount: 3,
       boxSize: 1,
-      style: 'ATR',
+      style: "ATR",
       atrLength: 14,
       oneStepBackBuilding: false,
     },
@@ -103,11 +103,11 @@ setTimeout(() => {
 
 /* (25s) Range chart */
 setTimeout(() => {
-  console.log('\nSetting chart type to: Range');
+  console.log("\nSetting chart type to: Range");
 
-  chart.setMarket('BINANCE:BTCEUR', {
-    type: 'Range',
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    type: "Range",
+    timeframe: "D",
     inputs: {
       range: 1,
       phantomBars: false,
@@ -117,6 +117,6 @@ setTimeout(() => {
 
 /* (30s) Delete chart, close client */
 setTimeout(() => {
-  console.log('\nClosing client...');
+  console.log("\nClosing client...");
   client.end();
 }, 30000);

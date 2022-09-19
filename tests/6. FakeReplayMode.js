@@ -1,23 +1,23 @@
-const TradingView = require('../main');
+const TradingView = require("../main");
 
 module.exports = async (log, success, warn, err, cb) => {
   const client = new TradingView.Client();
 
   client.onError((...error) => {
-    err('Client error', error);
-    throw new Error('Client error');
+    err("Client error", error);
+    throw new Error("Client error");
   });
 
   const chart = new client.Session.Chart();
-  chart.setMarket('BINANCE:BTCEUR', {
-    timeframe: 'D',
+  chart.setMarket("BINANCE:BTCEUR", {
+    timeframe: "D",
     range: -1,
     to: Math.round(Date.now() / 1000) - 86400 * 7,
   });
 
   chart.onError((...error) => {
-    err('Chart error', error);
-    throw new Error('Chart error');
+    err("Chart error", error);
+    throw new Error("Chart error");
   });
 
   let interval = NaN;
@@ -46,7 +46,7 @@ module.exports = async (log, success, warn, err, cb) => {
       throw new Error(`Wrong interval: ${intrval} (should be ${interval})`);
     }
 
-    log('Next ->', times[0]);
+    log("Next ->", times[0]);
 
     if ((times[0] + 86400) * 1000 > Date.now()) {
       chart.delete();

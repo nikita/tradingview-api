@@ -17,50 +17,50 @@
  */
 
 const defaultValues = {
-  'Volume@tv-basicstudies-144': {
+  "Volume@tv-basicstudies-144": {
     length: 20,
     col_prev_close: false,
   },
-  'VbPFixed@tv-basicstudies-139!': {
-    rowsLayout: 'Number Of Rows',
+  "VbPFixed@tv-basicstudies-139!": {
+    rowsLayout: "Number Of Rows",
     rows: 24,
-    volume: 'Up/Down',
+    volume: "Up/Down",
     vaVolume: 70,
     subscribeRealtime: false,
     first_bar_time: NaN,
     last_bar_time: Date.now(),
   },
-  'VbPFixed@tv-volumebyprice-53!': {
-    rowsLayout: 'Number Of Rows',
+  "VbPFixed@tv-volumebyprice-53!": {
+    rowsLayout: "Number Of Rows",
     rows: 24,
-    volume: 'Up/Down',
+    volume: "Up/Down",
     vaVolume: 70,
     subscribeRealtime: false,
     first_bar_time: NaN,
     last_bar_time: Date.now(),
   },
-  'VbPSessions@tv-volumebyprice-53': {
-    rowsLayout: 'Number Of Rows',
+  "VbPSessions@tv-volumebyprice-53": {
+    rowsLayout: "Number Of Rows",
     rows: 24,
-    volume: 'Up/Down',
+    volume: "Up/Down",
     vaVolume: 70,
     extendPocRight: false,
   },
-  'VbPSessionsRough@tv-volumebyprice-53!': {
-    volume: 'Up/Down',
+  "VbPSessionsRough@tv-volumebyprice-53!": {
+    volume: "Up/Down",
     vaVolume: 70,
   },
-  'VbPSessionsDetailed@tv-volumebyprice-53!': {
-    volume: 'Up/Down',
+  "VbPSessionsDetailed@tv-volumebyprice-53!": {
+    volume: "Up/Down",
     vaVolume: 70,
     subscribeRealtime: false,
     first_visible_bar_time: NaN,
     last_visible_bar_time: Date.now(),
   },
-  'VbPVisible@tv-volumebyprice-53': {
-    rowsLayout: 'Number Of Rows',
+  "VbPVisible@tv-volumebyprice-53": {
+    rowsLayout: "Number Of Rows",
     rows: 24,
-    volume: 'Up/Down',
+    volume: "Up/Down",
     vaVolume: 70,
     subscribeRealtime: false,
     first_visible_bar_time: NaN,
@@ -89,7 +89,7 @@ module.exports = class BuiltInIndicator {
   /**
    * @param {BuiltInIndicatorType} type Buit-in indocator raw type
    */
-  constructor(type = '') {
+  constructor(type = "") {
     if (!type) throw new Error(`Wrong buit-in indicator type "${type}".`);
 
     this.#type = type;
@@ -108,16 +108,26 @@ module.exports = class BuiltInIndicator {
       return;
     }
 
-    if (defaultValues[this.#type] && defaultValues[this.#type][key] !== undefined) {
+    if (
+      defaultValues[this.#type] &&
+      defaultValues[this.#type][key] !== undefined
+    ) {
       const requiredType = typeof defaultValues[this.#type][key];
       const valType = typeof value;
       if (requiredType !== valType) {
-        throw new Error(`Wrong '${key}' value type '${valType}' (must be '${requiredType}')`);
+        throw new Error(
+          `Wrong '${key}' value type '${valType}' (must be '${requiredType}')`
+        );
       }
     }
 
-    if (defaultValues[this.#type] && defaultValues[this.#type][key] === undefined) {
-      throw new Error(`Option '${key}' is denied with '${this.#type}' indicator`);
+    if (
+      defaultValues[this.#type] &&
+      defaultValues[this.#type][key] === undefined
+    ) {
+      throw new Error(
+        `Option '${key}' is denied with '${this.#type}' indicator`
+      );
     }
 
     this.#options[key] = value;

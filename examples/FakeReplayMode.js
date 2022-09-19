@@ -1,4 +1,4 @@
-const { Client } = require('../main');
+const { Client } = require("../main");
 
 /*
   This example tests the fake
@@ -6,13 +6,13 @@ const { Client } = require('../main');
   intraday even with free plan
 */
 
-console.log('----- Testing FakeReplayMode: -----');
+console.log("----- Testing FakeReplayMode: -----");
 
 const client = new Client();
 const chart = new client.Session.Chart();
 
-chart.setMarket('BINANCE:BTCEUR', {
-  timeframe: 'D',
+chart.setMarket("BINANCE:BTCEUR", {
+  timeframe: "D",
   range: -1, // Range is negative, so 'to' means 'from'
   to: Math.round(Date.now() / 1000) - 86400 * 7, // Seven days before now
   // to: 1600000000,
@@ -30,11 +30,11 @@ chart.onUpdate(async () => {
     throw new Error(`Wrong interval: ${intrval} (should be ${interval})`);
   }
 
-  console.log('Next ->', times[0]);
+  console.log("Next ->", times[0]);
 
   if ((times[0] + 86400) * 1000 > Date.now()) {
     await client.end();
-    console.log('Done !', times.length);
+    console.log("Done !", times.length);
   }
 
   chart.fetchMore(-1);
