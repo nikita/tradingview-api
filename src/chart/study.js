@@ -1,9 +1,9 @@
-const { genSessionID } = require('../utils');
-const { parseCompressed } = require('../protocol');
-const graphicParser = require('./graphicParser');
+const { genSessionID } = require("../utils");
+const { parseCompressed } = require("../protocol");
+const graphicParser = require("./graphicParser");
 
-const PineIndicator = require('../classes/PineIndicator');
-const BuiltInIndicator = require('../classes/BuiltInIndicator');
+const PineIndicator = require("../classes/PineIndicator");
+const BuiltInIndicator = require("../classes/BuiltInIndicator");
 
 /**
  * Get pine inputs
@@ -20,7 +20,7 @@ function getInputs(options) {
       const input = options.inputs[inputID];
 
       pineInputs[inputID] = {
-        v: (input.type !== 'color') ? input.value : n,
+        v: input.type !== "color" ? input.value : n,
         f: input.isFake,
         t: input.type,
       };
@@ -32,24 +32,25 @@ function getInputs(options) {
   return options.options;
 }
 
-const parseTrades = (trades) => trades.reverse().map((t) => ({
-  entry: {
-    name: t.e.c,
-    type: (t.e.tp[0] === 's' ? 'short' : 'long'),
-    value: t.e.p,
-    time: t.e.tm,
-  },
-  exit: {
-    name: t.x.c,
-    value: t.x.p,
-    time: t.x.tm,
-  },
-  quantity: t.q,
-  profit: t.tp,
-  cumulative: t.cp,
-  runup: t.rn,
-  drawdown: t.dd,
-}));
+const parseTrades = (trades) =>
+  trades.reverse().map((t) => ({
+    entry: {
+      name: t.e.c,
+      type: t.e.tp[0] === "s" ? "short" : "long",
+      value: t.e.p,
+      time: t.e.tm,
+    },
+    exit: {
+      name: t.x.c,
+      value: t.x.p,
+      time: t.x.tm,
+    },
+    quantity: t.q,
+    profit: t.tp,
+    cumulative: t.cp,
+    runup: t.rn,
+    drawdown: t.dd,
+  }));
 
 // const historyParser = (history) => history.reverse().map((h) => ({
 
@@ -105,7 +106,7 @@ const parseTrades = (trades) => trades.reverse().map((t) => ({
  * @prop {number} ratioAvgWinAvgLoss Ratio Average Win / Average Loss
  * @prop {number} totalOpenTrades Total open trades
  * @prop {number} totalTrades Total trades
-*/
+ */
 
 /**
  * @typedef {Object} FromTo
@@ -145,290 +146,300 @@ const parseTrades = (trades) => trades.reverse().map((t) => ({
 /**
  * @param {import('./session').ChartSessionBridge} chartSession
  */
-module.exports = (chartSession) => class ChartStudy {
-  #studID = genSessionID('st');
+module.exports = (chartSession) =>
+  class ChartStudy {
+    #studID = genSessionID("st");
 
-  #studyListeners = chartSession.studyListeners;
+    #studyListeners = chartSession.studyListeners;
 
-  /**
-   * Table of periods values indexed by timestamp
-   * @type {Object<number, {}[]>}
-   */
-  #periods = {};
+    /**
+     * Table of periods values indexed by timestamp
+     * @type {Object<number, {}[]>}
+     */
+    #periods = {};
 
-  /** @return {{}[]} List of periods values */
-  get periods() {
-    return Object.values(this.#periods).sort((a, b) => b.$time - a.$time);
-  }
-
-  /**
-   * List of graphic xPos indexes
-   * @type {number[]}
-   */
-  #indexes = [];
-
-  /**
-   * Table of graphic drawings indexed by type and ID
-   * @type {Object<string, Object<number, {}>>}
-   */
-  #graphic = {};
-
-  /**
-   * Table of graphic drawings indexed by type
-   * @return {import('./graphicParser').GraphicData}
-   */
-  get graphic() {
-    const translator = {};
-
-    Object.keys(chartSession.indexes)
-      .sort((a, b) => chartSession.indexes[b] - chartSession.indexes[a])
-      .forEach((r, n) => { translator[r] = n; });
-
-    const indexes = this.#indexes.map((i) => translator[i]);
-    return graphicParser(this.#graphic, indexes);
-  }
-
-  /** @type {StrategyReport} */
-  #strategyReport = {
-    trades: [],
-    history: {},
-    performance: {},
-  };
-
-  /** @return {StrategyReport} Get the strategy report if available */
-  get strategyReport() {
-    return this.#strategyReport;
-  }
-
-  #callbacks = {
-    studyCompleted: [],
-    update: [],
-
-    event: [],
-    error: [],
-  };
-
-  /**
-   * @param {ChartEvent} ev Client event
-   * @param {...{}} data Packet data
-   */
-  #handleEvent(ev, ...data) {
-    this.#callbacks[ev].forEach((e) => e(...data));
-    this.#callbacks.event.forEach((e) => e(ev, ...data));
-  }
-
-  #handleError(...msgs) {
-    if (this.#callbacks.error.length === 0) console.error(...msgs);
-    else this.#handleEvent('error', ...msgs);
-  }
-
-  /**
-   * @param {PineIndicator | BuiltInIndicator} indicator Indicator object instance
-   */
-  constructor(indicator) {
-    if (!(indicator instanceof PineIndicator) && !(indicator instanceof BuiltInIndicator)) {
-      throw new Error(`Indicator argument must be an instance of PineIndicator or BuiltInIndicator.
-      Please use 'TradingView.getIndicator(...)' function.`);
+    /** @return {{}[]} List of periods values */
+    get periods() {
+      return Object.values(this.#periods).sort((a, b) => b.$time - a.$time);
     }
 
-    /** @type {PineIndicator | BuiltInIndicator} Indicator instance */
-    this.instance = indicator;
+    /**
+     * List of graphic xPos indexes
+     * @type {number[]}
+     */
+    #indexes = [];
 
-    this.#studyListeners[this.#studID] = async (packet) => {
-      if (global.TW_DEBUG) console.log('§90§30§105 STUDY §0 DATA', packet);
+    /**
+     * Table of graphic drawings indexed by type and ID
+     * @type {Object<string, Object<number, {}>>}
+     */
+    #graphic = {};
 
-      if (packet.type === 'study_completed') {
-        this.#handleEvent('studyCompleted');
-        return;
-      }
+    /**
+     * Table of graphic drawings indexed by type
+     * @return {import('./graphicParser').GraphicData}
+     */
+    get graphic() {
+      const translator = {};
 
-      if (['timescale_update', 'du'].includes(packet.type)) {
-        const changes = [];
-        const data = packet.data[1][this.#studID];
+      Object.keys(chartSession.indexes)
+        .sort((a, b) => chartSession.indexes[b] - chartSession.indexes[a])
+        .forEach((r, n) => {
+          translator[r] = n;
+        });
 
-        if (data && data.st && data.st[0]) {
-          data.st.forEach((p) => {
-            const period = {};
+      const indexes = this.#indexes.map((i) => translator[i]);
+      return graphicParser(this.#graphic, indexes);
+    }
 
-            p.v.forEach((plot, i) => {
-              if (!this.instance.plots) {
-                period[i === 0 ? '$time' : `plot_${i - 1}`] = plot;
-                return;
-              }
-              const plotName = (i === 0 ? '$time' : this.instance.plots[`plot_${i - 1}`]);
-              if (plotName && !period[plotName]) period[plotName] = plot;
-              else period[`plot_${i - 1}`] = plot;
-            });
-
-            this.#periods[p.v[0]] = period;
-          });
-
-          changes.push('plots');
-        }
-
-        if (data.ns && data.ns.d) {
-          const parsed = JSON.parse(data.ns.d);
-
-          if (parsed.graphicsCmds) {
-            if (parsed.graphicsCmds.erase) {
-              parsed.graphicsCmds.erase.forEach((instruction) => {
-                // console.log('Erase', instruction);
-                if (instruction.action === 'all') {
-                  if (!instruction.type) {
-                    Object.keys(this.#graphic).forEach((drawType) => {
-                      this.#graphic[drawType] = {};
-                    });
-                  } else delete this.#graphic[instruction.type];
-                  return;
-                }
-
-                if (instruction.action === 'one') {
-                  delete this.#graphic[instruction.type][instruction.id];
-                }
-                // Can an 'instruction' contains other things ?
-              });
-            }
-
-            if (parsed.graphicsCmds.create) {
-              Object.keys(parsed.graphicsCmds.create).forEach((drawType) => {
-                if (!this.#graphic[drawType]) this.#graphic[drawType] = {};
-                parsed.graphicsCmds.create[drawType].forEach((group) => {
-                  group.data.forEach((item) => {
-                    this.#graphic[drawType][item.id] = item;
-                  });
-                });
-              });
-            }
-
-            // console.log('graphicsCmds', Object.keys(parsed.graphicsCmds));
-            // Can 'graphicsCmds' contains other things ?
-
-            changes.push('graphic');
-          }
-
-          const updateStrategyReport = (report) => {
-            if (report.currency) {
-              this.#strategyReport.currency = report.currency;
-              changes.push('report.currency');
-            }
-
-            if (report.settings) {
-              this.#strategyReport.settings = report.settings;
-              changes.push('report.settings');
-            }
-
-            if (report.performance) {
-              this.#strategyReport.performance = report.performance;
-              changes.push('report.perf');
-            }
-
-            if (report.trades) {
-              this.#strategyReport.trades = parseTrades(report.trades);
-              changes.push('report.trades');
-            }
-
-            if (report.equity) {
-              this.#strategyReport.history = {
-                buyHold: report.buyHold,
-                buyHoldPercent: report.buyHoldPercent,
-                drawDown: report.drawDown,
-                drawDownPercent: report.drawDownPercent,
-                equity: report.equity,
-                equityPercent: report.equityPercent,
-              };
-              changes.push('report.history');
-            }
-          };
-
-          if (parsed.dataCompressed) {
-            updateStrategyReport((await parseCompressed(parsed.dataCompressed)).report);
-          }
-
-          if (parsed.data && parsed.data.report) updateStrategyReport(parsed.data.report);
-        }
-
-        if (data.ns.indexes && typeof data.ns.indexes === 'object') {
-          this.#indexes = data.ns.indexes;
-        }
-
-        this.#handleEvent('update', changes);
-        return;
-      }
-
-      if (packet.type === 'study_error') {
-        this.#handleError(packet.data[3], packet.data[4]);
-      }
+    /** @type {StrategyReport} */
+    #strategyReport = {
+      trades: [],
+      history: {},
+      performance: {},
     };
 
-    chartSession.send('create_study', [
-      chartSession.sessionID,
-      `${this.#studID}`,
-      'st1',
-      '$prices',
-      this.instance.type,
-      getInputs(this.instance),
-    ]);
-  }
-
-  /**
-   * @param {PineIndicator | BuiltInIndicator} indicator Indicator instance
-   */
-  setIndicator(indicator) {
-    if (!(indicator instanceof PineIndicator) && !(indicator instanceof BuiltInIndicator)) {
-      throw new Error(`Indicator argument must be an instance of PineIndicator or BuiltInIndicator.
-      Please use 'TradingView.getIndicator(...)' function.`);
+    /** @return {StrategyReport} Get the strategy report if available */
+    get strategyReport() {
+      return this.#strategyReport;
     }
 
-    this.instance = indicator;
+    #callbacks = {
+      studyCompleted: [],
+      update: [],
 
-    chartSession.send('modify_study', [
-      chartSession.sessionID,
-      `${this.#studID}`,
-      'st1',
-      getInputs(this.instance),
-    ]);
-  }
+      event: [],
+      error: [],
+    };
 
-  /**
-   * When the indicator is ready
-   * @param {() => void} cb
-   * @event
-   */
-  onReady(cb) {
-    this.#callbacks.studyCompleted.push(cb);
-  }
+    /**
+     * @param {ChartEvent} ev Client event
+     * @param {...{}} data Packet data
+     */
+    #handleEvent(ev, ...data) {
+      this.#callbacks[ev].forEach((e) => e(...data));
+      this.#callbacks.event.forEach((e) => e(ev, ...data));
+    }
 
-  /**
-   * @typedef {'plots' | 'report.currency'
-   *  | 'report.settings' | 'report.perf'
-   *  | 'report.trades' | 'report.history'
-   * } UpdateChangeType
-   */
+    #handleError(...msgs) {
+      if (this.#callbacks.error.length === 0) console.error(...msgs);
+      else this.#handleEvent("error", ...msgs);
+    }
 
-  /**
-   * When an indicator update happens
-   * @param {(changes: UpdateChangeType[]) => void} cb
-   * @event
-   */
-  onUpdate(cb) {
-    this.#callbacks.update.push(cb);
-  }
+    /**
+     * @param {PineIndicator | BuiltInIndicator} indicator Indicator object instance
+     */
+    constructor(indicator) {
+      if (
+        !(indicator instanceof PineIndicator) &&
+        !(indicator instanceof BuiltInIndicator)
+      ) {
+        throw new Error(`Indicator argument must be an instance of PineIndicator or BuiltInIndicator.
+      Please use 'TradingView.getIndicator(...)' function.`);
+      }
 
-  /**
-   * When indicator error happens
-   * @param {(...any) => void} cb Callback
-   * @event
-   */
-  onError(cb) {
-    this.#callbacks.error.push(cb);
-  }
+      /** @type {PineIndicator | BuiltInIndicator} Indicator instance */
+      this.instance = indicator;
 
-  /** Remove the study */
-  remove() {
-    chartSession.send('remove_study', [
-      chartSession.sessionID,
-      this.#studID,
-    ]);
-    delete this.#studyListeners[this.#studID];
-  }
-};
+      this.#studyListeners[this.#studID] = async (packet) => {
+        if (global.TW_DEBUG) console.log("§90§30§105 STUDY §0 DATA", packet);
+
+        if (packet.type === "study_completed") {
+          this.#handleEvent("studyCompleted");
+          return;
+        }
+
+        if (["timescale_update", "du"].includes(packet.type)) {
+          const changes = [];
+          const data = packet.data[1][this.#studID];
+
+          if (data && data.st && data.st[0]) {
+            data.st.forEach((p) => {
+              const period = {};
+
+              p.v.forEach((plot, i) => {
+                if (!this.instance.plots) {
+                  period[i === 0 ? "$time" : `plot_${i - 1}`] = plot;
+                  return;
+                }
+                const plotName =
+                  i === 0 ? "$time" : this.instance.plots[`plot_${i - 1}`];
+                if (plotName && !period[plotName]) period[plotName] = plot;
+                else period[`plot_${i - 1}`] = plot;
+              });
+
+              this.#periods[p.v[0]] = period;
+            });
+
+            changes.push("plots");
+          }
+
+          if (data.ns && data.ns.d) {
+            const parsed = JSON.parse(data.ns.d);
+
+            if (parsed.graphicsCmds) {
+              if (parsed.graphicsCmds.erase) {
+                parsed.graphicsCmds.erase.forEach((instruction) => {
+                  // console.log('Erase', instruction);
+                  if (instruction.action === "all") {
+                    if (!instruction.type) {
+                      Object.keys(this.#graphic).forEach((drawType) => {
+                        this.#graphic[drawType] = {};
+                      });
+                    } else delete this.#graphic[instruction.type];
+                    return;
+                  }
+
+                  if (instruction.action === "one") {
+                    delete this.#graphic[instruction.type][instruction.id];
+                  }
+                  // Can an 'instruction' contains other things ?
+                });
+              }
+
+              if (parsed.graphicsCmds.create) {
+                Object.keys(parsed.graphicsCmds.create).forEach((drawType) => {
+                  if (!this.#graphic[drawType]) this.#graphic[drawType] = {};
+                  parsed.graphicsCmds.create[drawType].forEach((group) => {
+                    group.data.forEach((item) => {
+                      this.#graphic[drawType][item.id] = item;
+                    });
+                  });
+                });
+              }
+
+              // console.log('graphicsCmds', Object.keys(parsed.graphicsCmds));
+              // Can 'graphicsCmds' contains other things ?
+
+              changes.push("graphic");
+            }
+
+            const updateStrategyReport = (report) => {
+              if (report.currency) {
+                this.#strategyReport.currency = report.currency;
+                changes.push("report.currency");
+              }
+
+              if (report.settings) {
+                this.#strategyReport.settings = report.settings;
+                changes.push("report.settings");
+              }
+
+              if (report.performance) {
+                this.#strategyReport.performance = report.performance;
+                changes.push("report.perf");
+              }
+
+              if (report.trades) {
+                this.#strategyReport.trades = parseTrades(report.trades);
+                changes.push("report.trades");
+              }
+
+              if (report.equity) {
+                this.#strategyReport.history = {
+                  buyHold: report.buyHold,
+                  buyHoldPercent: report.buyHoldPercent,
+                  drawDown: report.drawDown,
+                  drawDownPercent: report.drawDownPercent,
+                  equity: report.equity,
+                  equityPercent: report.equityPercent,
+                };
+                changes.push("report.history");
+              }
+            };
+
+            if (parsed.dataCompressed) {
+              updateStrategyReport(
+                (await parseCompressed(parsed.dataCompressed)).report
+              );
+            }
+
+            if (parsed.data && parsed.data.report)
+              updateStrategyReport(parsed.data.report);
+          }
+
+          if (data.ns.indexes && typeof data.ns.indexes === "object") {
+            this.#indexes = data.ns.indexes;
+          }
+
+          this.#handleEvent("update", changes);
+          return;
+        }
+
+        if (packet.type === "study_error") {
+          this.#handleError(packet.data[3], packet.data[4]);
+        }
+      };
+
+      chartSession.send("create_study", [
+        chartSession.sessionID,
+        `${this.#studID}`,
+        "st1",
+        "$prices",
+        this.instance.type,
+        getInputs(this.instance),
+      ]);
+    }
+
+    /**
+     * @param {PineIndicator | BuiltInIndicator} indicator Indicator instance
+     */
+    setIndicator(indicator) {
+      if (
+        !(indicator instanceof PineIndicator) &&
+        !(indicator instanceof BuiltInIndicator)
+      ) {
+        throw new Error(`Indicator argument must be an instance of PineIndicator or BuiltInIndicator.
+      Please use 'TradingView.getIndicator(...)' function.`);
+      }
+
+      this.instance = indicator;
+
+      chartSession.send("modify_study", [
+        chartSession.sessionID,
+        `${this.#studID}`,
+        "st1",
+        getInputs(this.instance),
+      ]);
+    }
+
+    /**
+     * When the indicator is ready
+     * @param {() => void} cb
+     * @event
+     */
+    onReady(cb) {
+      this.#callbacks.studyCompleted.push(cb);
+    }
+
+    /**
+     * @typedef {'plots' | 'report.currency'
+     *  | 'report.settings' | 'report.perf'
+     *  | 'report.trades' | 'report.history'
+     * } UpdateChangeType
+     */
+
+    /**
+     * When an indicator update happens
+     * @param {(changes: UpdateChangeType[]) => void} cb
+     * @event
+     */
+    onUpdate(cb) {
+      this.#callbacks.update.push(cb);
+    }
+
+    /**
+     * When indicator error happens
+     * @param {(...any) => void} cb Callback
+     * @event
+     */
+    onError(cb) {
+      this.#callbacks.error.push(cb);
+    }
+
+    /** Remove the study */
+    remove() {
+      chartSession.send("remove_study", [chartSession.sessionID, this.#studID]);
+      delete this.#studyListeners[this.#studID];
+    }
+  };
