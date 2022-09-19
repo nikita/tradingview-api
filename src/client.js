@@ -154,8 +154,16 @@ module.exports = class Client {
     this.#callbacks.event.push(cb);
   }
 
-  #parsePacket(str) {
+  /**
+   * Parse a websocket packet
+   * @param {WebSocket.RawData} data Data represents the raw message payload received over the WebSocket.
+   * @param {boolean} isBinary Specifies whether the message is binary or not.
+   */
+  #parsePacket(data, isBinary) {
     if (!this.isOpen) return;
+
+    // Decode websocket message if binary
+    const str = isBinary ? data : data.toString();
 
     protocol.parseWSPacket(str).forEach((packet) => {
       if (global.TW_DEBUG) console.log("§90§30§107 CLIENT §0 PACKET", packet);
@@ -272,7 +280,9 @@ module.exports = class Client {
       this.#handleEvent("disconnected");
     });
 
-    this.#ws.on("message", (data) => this.#parsePacket(data));
+    this.#ws.on("message", (data, isBinary) =>
+      this.#parsePacket(data, isBinary)
+    );
   }
 
   /** @type {ClientBridge} */
