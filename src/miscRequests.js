@@ -579,6 +579,36 @@ module.exports = {
     return data.token;
   },
 
+  /** @typedef {object} WatchList
+   * @prop {number} id
+   * @prop {string} type
+   * @prop {string} name
+   * @prop {string[] | {}} symbols
+   * @prop {boolean} active
+   * @prop {boolean} shared
+   * @prop {string | null} color
+   * @prop {null} description
+   * @prop {string | null} created
+   * @prop {string} modified
+   * @prop {string} legacy_id
+   */
+
+  /**
+   * Get all user's watchlists from a 'sessionid' cookie
+   * @function getAllWatchLists
+   * @param {string} session User 'sessionid' cookie
+   * @returns {Promise<WatchList[]>} WatchLists
+   */
+  async getAllWatchLists(session) {
+    const { data } = await request({
+      host: "www.tradingview.com",
+      path: "/api/v1/symbols_list/all/",
+      headers: { cookie: `sessionid=${session}` },
+    });
+
+    return data;
+  },
+
   /**
    * @typedef {Object} DrawingPoint Drawing poitn
    * @prop {number} time_t Point X time position
